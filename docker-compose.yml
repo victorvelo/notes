@@ -9,15 +9,33 @@ services:
       - "5432"
     image: postgres:14-alpine
     networks:
-      default: null
+      - notes
     ports:
       - target: 5432
         published: "5432"
     volumes:
       - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
       - postgres-data:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  notes-app:
+    container_name: notes-app
+    build: ./
+    environment: 
+      - path=./config.json
+    ports:
+      - 8000:8000
+    networks:
+      - notes 
+    depends_on:
+      postgres:
+        condition: service_healthy      
 networks:
-  default:
-    name: _default
+  notes:
+
 volumes: 
   postgres-data:

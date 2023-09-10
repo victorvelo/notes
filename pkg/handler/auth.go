@@ -17,6 +17,11 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	if userInput.Login == "" || userInput.Password == "" {
+		ResponseError(w, http.StatusBadRequest, InvalidRequest)
+		return
+	}
+
 	if err := h.service.Authorization.Add(userInput); err != nil {
 		ResponseError(w, http.StatusInternalServerError, err.Error())
 		return
